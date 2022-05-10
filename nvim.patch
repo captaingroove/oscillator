@@ -1,0 +1,84 @@
+diff --git a/src/nvim/api/vim.c b/src/nvim/api/vim.c
+index 626f7dc3e..3f7edbaba 100644
+--- a/src/nvim/api/vim.c
++++ b/src/nvim/api/vim.c
+@@ -2451,3 +2451,17 @@ void nvim_del_user_command(String name, Error *err)
+ {
+   nvim_buf_del_user_command(-1, name, err);
+ }
++
++/// Stop processing of input stream of all attached terminal uis.
++void nvim_ui_terminput_start(void)
++  FUNC_API_SINCE(10)
++{
++  ui_terminput_start_impl();
++}
++
++/// Start processing of input stream of all attached terminal uis.
++void nvim_ui_terminput_stop(void)
++  FUNC_API_SINCE(10)
++{
++  ui_terminput_stop_impl();
++}
+diff --git a/src/nvim/tui/tui.c b/src/nvim/tui/tui.c
+index 13a67dafa..f888d3601 100644
+--- a/src/nvim/tui/tui.c
++++ b/src/nvim/tui/tui.c
+@@ -469,6 +469,7 @@ static void tui_main(UIBridgeData *bridge, UI *ui)
+   loop_init(&tui_loop, NULL);
+   TUIData *data = xcalloc(1, sizeof(TUIData));
+   ui->data = data;
++  bridge->bridge.data = data;
+   data->bridge = bridge;
+   data->loop = &tui_loop;
+   data->is_starting = true;
+@@ -2236,4 +2237,27 @@ static const char *tui_tk_ti_getstr(const char *name, const char *value, void *d
+ 
+   return value;
+ }
++
++void tui_terminput_start_impl(UI *ui)
++{
++    TUIData *data = (TUIData *)ui->data;
++    if (!data) {
++      return;
++    }
++    if (os_isatty(data->input.in_fd)) {
++      tinput_start(&data->input);
++    }
++}
++
++void tui_terminput_stop_impl(UI *ui)
++{
++    TUIData *data = (TUIData *)ui->data;
++    if (!data) {
++      return;
++    }
++    if (os_isatty(data->input.in_fd)) {
++      tinput_stop(&data->input);
++    }
++}
++
+ #endif
+diff --git a/src/nvim/ui.c b/src/nvim/ui.c
+index 4fe3e1157..efaff16f3 100644
+--- a/src/nvim/ui.c
++++ b/src/nvim/ui.c
+@@ -658,3 +658,17 @@ void ui_grid_resize(handle_T grid_handle, int width, int height, Error *error)
+     win_set_inner_size(wp);
+   }
+ }
++
++void ui_terminput_start_impl(void)
++{
++  for (size_t i = 0; i < ui_count; i++) {
++    tui_terminput_start_impl(uis[i]);
++  }
++}
++
++void ui_terminput_stop_impl(void)
++{
++  for (size_t i = 0; i < ui_count; i++) {
++    tui_terminput_stop_impl(uis[i]);
++  }
++}
