@@ -24,7 +24,7 @@ if exists('g:oscillator_loaded') || &compatible
 endif
 let g:oscillator_loaded = 1
 
-let s:yank_silent = get(g:, 'oscillator_yank_silent', v:true)
+let s:silent = get(g:, 'oscillator_silent', v:true)
 let s:yank_limit = get(g:, 'oscillator_yank_limit', 0)
 let s:base64decoder = get(g:, 'oscillator_base64decoder', '')
 let s:base64encoder = get(g:, 'oscillator_base64encoder', '')
@@ -49,7 +49,7 @@ function! OscillatorWriteStrToClipboard(str, clipboard_type)
   endif
   let request = "\e]52;" . a:clipboard_type . ";" . str_encoded . "\x07"
   call s:raw_echo(request)
-  if !s:yank_silent
+  if !s:silent
     echom '[oscillator] ' . length . ' characters written to clipboard'
   endif
 endfunction
@@ -99,7 +99,7 @@ function! OscillatorReadStrFromClipboard(clipboard_type)
       let str_decoded = s:b64decode(response)
     endif
   endif
-  if !s:yank_silent
+  if !s:silent
     echom "[oscillator] " . strlen(str_decoded) . " characters read from clipboard"
   endif
   return str_decoded

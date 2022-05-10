@@ -11,10 +11,10 @@ make pasting from clipboard work. The patch is supplied in this repository
 Sample vimrc entries to configure oscillator and enable transparent clipboard
 access for neovim.
 
+    " let g:oscillator_silent = v:true
     " let g:oscillator_yank_limit = 1000000
     " let g:oscillator_base64decoder = 'base64 -d'
     " let g:oscillator_base64encoder = 'base64'
-    " let g:oscyank_silent = v:true
     if has('nvim')
       let g:clipboard = {
         \ 'name': 'Oscillator',
