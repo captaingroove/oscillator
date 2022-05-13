@@ -15,6 +15,8 @@ access for neovim.
     " let g:oscillator_yank_limit = 1000000
     " let g:oscillator_base64decoder = 'base64 -d'
     " let g:oscillator_base64encoder = 'base64'
+    " let g:oscillator_osc52_default_selection = 'clipboard'
+    " let g:oscillator_osc52_default_selection = 'primary'
     if has('nvim')
       let g:clipboard = {
         \ 'name': 'oscillator',
