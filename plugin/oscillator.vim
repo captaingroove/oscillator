@@ -28,11 +28,11 @@ if has('nvim')
   lua require('oscillator')
 endif
 
-let s:silent = get(g:, 'oscillator_silent', v:true)
-let s:yank_limit = get(g:, 'oscillator_yank_limit', 0)
-let s:base64decoder = get(g:, 'oscillator_base64decoder', '')
-let s:base64encoder = get(g:, 'oscillator_base64encoder', '')
-let s:osc52_default_selection = get(g:, 'oscillator_osc52_default_selection', 'clipboard') ? 'c' : 'p'
+let g:oscillator_silent = get(g:, 'oscillator_silent', v:true)
+let g:oscillator_yank_limit = get(g:, 'oscillator_yank_limit', 0)
+let g:oscillator_base64decoder = get(g:, 'oscillator_base64decoder', '')
+let g:oscillator_base64encoder = get(g:, 'oscillator_base64encoder', '')
+let g:oscillator_osc52_default_selection = get(g:, 'oscillator_osc52_default_selection', 'clipboard') ? 'c' : 'p'
 
 function! s:warn(msg)
   echohl WarningMsg
@@ -42,22 +42,22 @@ endfunction
 
 function! OscillatorWriteStrToClipboard(str, clipboard_type)
   let length = strlen(a:str)
-  if s:yank_limit > 0 && length > s:yank_limit
-    call s:warn('[oscillator] selection has length ' . length . ', limit is ' . s:yank_limit)
+  if g:oscillator_yank_limit > 0 && length > g:oscillator_yank_limit
+    call s:warn('[oscillator] selection has length ' . length . ', limit is ' . g:oscillator_yank_limit)
     return
   endif
   if has('nvim')
     call luaeval("oscillator_write_to_clipboard(_A, '" . a:clipboard_type . "')", a:str)
   else
-    if strlen(s:base64encoder)
-      let str_encoded = system('echo ' . a:str . ' | ' . s:base64encoder)
+    if strlen(g:oscillator_base64encoder)
+      let str_encoded = system('echo ' . a:str . ' | ' . g:oscillator_base64encoder)
     else
       let str_encoded = s:b64encode(a:str, 0)
     endif
     let request = "\e]52;" . a:clipboard_type . ";" . str_encoded . "\x07"
     call s:raw_echo(request)
   endif
-  if !s:silent
+  if !g:oscillator_silent
     echom '[oscillator] ' . length . ' characters written to clipboard'
   endif
 endfunction
@@ -87,13 +87,13 @@ function! OscillatorReadStrFromClipboard(clipboard_type)
         let response .= nr2char(char)
       endif
     endwhile
-    if strlen(s:base64decoder)
-      let str_decoded = system('echo ' . response . ' | ' . s:base64decoder)
+    if strlen(g:oscillator_base64decoder)
+      let str_decoded = system('echo ' . response . ' | ' . g:oscillator_base64decoder)
     else
       let str_decoded = s:b64decode(response)
     endif
   endif
-  if !s:silent
+  if !g:oscillator_silent
     echom "[oscillator] " . strlen(str_decoded) . " characters read from clipboard"
   endif
   return str_decoded
@@ -126,7 +126,7 @@ endfunction
 function! OscillatorPaste()
   " TODO leave a choice which clipboard_type to read from when pasting
   " directly into the buffer, without using registers?
-  let str = OscillatorReadStrFromClipboard(s:osc52_default_selection)
+  let str = OscillatorReadStrFromClipboard(g:oscillator_osc52_default_selection)
   exe "normal! a" . str . "\<Esc>"
 endfunction
 
@@ -142,7 +142,7 @@ function! OscillatorYankVisual() range
   let lines[0] = lines[0][column_start - 1:]
   " TODO leave a choice which clipboard_type to write to when yanking
   " directly from the buffer to the clipboard, without using registers?
-  call OscillatorWriteStrToClipboard(join(lines, "\n"), s:osc52_default_selection)
+  call OscillatorWriteStrToClipboard(join(lines, "\n"), g:oscillator_osc52_default_selection)
   execute "normal! `<"
 endfunction
 
