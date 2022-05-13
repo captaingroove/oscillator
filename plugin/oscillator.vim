@@ -32,6 +32,7 @@ let s:silent = get(g:, 'oscillator_silent', v:true)
 let s:yank_limit = get(g:, 'oscillator_yank_limit', 0)
 let s:base64decoder = get(g:, 'oscillator_base64decoder', '')
 let s:base64encoder = get(g:, 'oscillator_base64encoder', '')
+let s:osc52_default_selection = get(g:, 'oscillator_osc52_default_selection', 'clipboard') ? 'c' : 'p'
 
 function! s:warn(msg)
   echohl WarningMsg
@@ -125,7 +126,7 @@ endfunction
 function! OscillatorPaste()
   " TODO leave a choice which clipboard_type to read from when pasting
   " directly into the buffer, without using registers?
-  let str = OscillatorReadStrFromClipboard('c')
+  let str = OscillatorReadStrFromClipboard(s:osc52_default_selection)
   exe "normal! a" . str . "\<Esc>"
 endfunction
 
@@ -141,7 +142,7 @@ function! OscillatorYankVisual() range
   let lines[0] = lines[0][column_start - 1:]
   " TODO leave a choice which clipboard_type to write to when yanking
   " directly from the buffer to the clipboard, without using registers?
-  call OscillatorWriteStrToClipboard(join(lines, "\n"), 'c')
+  call OscillatorWriteStrToClipboard(join(lines, "\n"), s:osc52_default_selection)
   execute "normal! `<"
 endfunction
 
