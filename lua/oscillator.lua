@@ -20,7 +20,7 @@
 
 local base64 = require('base64')
 
-function oscillator_write_to_clipboard(clipboard_type, str)
+function oscillator_write_to_clipboard(str, clipboard_type)
     local stderr = io.open("/dev/fd/2", "w")
     str_encoded = base64.encode(str)
     stderr:write('\027]52;' .. clipboard_type .. ';' .. str_encoded .. '\007')

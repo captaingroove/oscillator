@@ -24,7 +24,9 @@ if exists('g:oscillator_loaded') || &compatible
 endif
 let g:oscillator_loaded = 1
 
-lua require('oscillator')
+if has('nvim')
+  lua require('oscillator')
+endif
 
 let s:silent = get(g:, 'oscillator_silent', v:true)
 let s:yank_limit = get(g:, 'oscillator_yank_limit', 0)
@@ -44,7 +46,7 @@ function! OscillatorWriteStrToClipboard(str, clipboard_type)
     return
   endif
   if has('nvim')
-    call luaeval('oscillator_write_to_clipboard("' . a:clipboard_type . '", "' . a:str . '")')
+    call luaeval("oscillator_write_to_clipboard(_A, '" . a:clipboard_type . "')", a:str)
   else
     if strlen(s:base64encoder)
       let str_encoded = system('echo ' . a:str . ' | ' . s:base64encoder)
@@ -59,22 +61,9 @@ function! OscillatorWriteStrToClipboard(str, clipboard_type)
   endif
 endfunction
 
-function! OscillatorWriteRegToClipboard(lines, regtype, clipboard_type)
-  let str = ''
-  " TODO handle all register types like 'c' characterwise text, 'l'
-  " linewise text, 'b' blockwise text, like column "Type" in the register
-  " listing or 'v', 'V', ... properly (-> help regtype)
-  if (a:regtype == 'l' || a:regtype == 'V')
-    let str = join(a:lines, "\n")
-  elseif (a:regtype == 'c' || a:regtype == 'v')
-    let str = a:lines[0]
-  endif
-  call OscillatorWriteStrToClipboard(str, a:clipboard_type)
-endfunction
-
 function! OscillatorReadStrFromClipboard(clipboard_type)
   if has('nvim')
-    let str_decoded = luaeval('oscillator_read_from_clipboard("' . a:clipboard_type . '")')
+    let str_decoded = luaeval("oscillator_read_from_clipboard('" . a:clipboard_type . "')")
   else
     let response = ''
     let request = "\e]52;" . a:clipboard_type . ";?\x07"
@@ -109,6 +98,19 @@ function! OscillatorReadStrFromClipboard(clipboard_type)
   return str_decoded
 endfunction
 
+function! OscillatorWriteRegToClipboard(lines, regtype, clipboard_type)
+  let str = ''
+  " TODO handle all register types like 'c' characterwise text, 'l'
+  " linewise text, 'b' blockwise text, like column "Type" in the register
+  " listing or 'v', 'V', ... properly (-> help regtype)
+  if (a:regtype == 'l' || a:regtype == 'V')
+    let str = join(a:lines, "\n")
+  elseif (a:regtype == 'c' || a:regtype == 'v')
+    let str = a:lines[0]
+  endif
+  call OscillatorWriteStrToClipboard(str, a:clipboard_type)
+endfunction
+
 function! OscillatorReadRegFromClipboard(clipboard_type)
   let str = OscillatorReadStrFromClipboard(a:clipboard_type)
   let lines = split(str, "\n")
@@ -133,7 +135,7 @@ function! OscillatorYankVisual() range
   let [line_end, column_end] = getpos("'>")[1:2]
   let lines = getline(line_start, line_end)
   if len(lines) == 0
-    return ''
+    return
   endif
   let lines[-1] = lines[-1][: column_end - (&selection == 'inclusive' ? 1 : 2)]
   let lines[0] = lines[0][column_start - 1:]
@@ -143,16 +145,16 @@ function! OscillatorYankVisual() range
   execute "normal! `<"
 endfunction
 
+command! -range OscillatorYank <line1>,<line2>call OscillatorYankVisual()
+command! -nargs=1 OscillatorYankReg call OscillatorWriteStrToClipboard(getreg(<f-args>))
+command! OscillatorPaste call OscillatorPaste()
+
 function! s:raw_echo(str)
-  if has('nvim')
-    call chansend(v:stderr, a:str)
+  if filewritable('/dev/fd/2')
+    call writefile([a:str], '/dev/fd/2', 'b')
   else
-    if filewritable('/dev/fd/2')
-      call writefile([a:str], '/dev/fd/2', 'b')
-    else
-      exec("silent! !echo " . shellescape(a:str))
-      redraw!
-    endif
+    exec("silent! !echo " . shellescape(a:str))
+    redraw!
   endif
 endfunction
 
@@ -272,7 +274,3 @@ endfunction
 function! s:b64decode(data) abort
   return s:bytes2str(s:b64decoderaw(a:data))
 endfunction
-
-command! -range OscillatorYank <line1>,<line2>call OscillatorYankVisual()
-command! -nargs=1 OscillatorYankReg call OscillatorWriteStrToClipboard(getreg(<f-args>))
-command! OscillatorPaste call OscillatorPaste()
