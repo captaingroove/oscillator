@@ -24,6 +24,8 @@ if exists('g:oscillator_loaded') || &compatible
 endif
 let g:oscillator_loaded = 1
 
+lua require('oscillator')
+
 let s:silent = get(g:, 'oscillator_silent', v:true)
 let s:yank_limit = get(g:, 'oscillator_yank_limit', 0)
 let s:base64decoder = get(g:, 'oscillator_base64decoder', '')
@@ -42,7 +44,6 @@ function! OscillatorWriteStrToClipboard(str, clipboard_type)
     return
   endif
   if has('nvim')
-    lua require('oscillator')
     call luaeval('oscillator_write_to_clipboard("' . a:clipboard_type . '", "' . a:str . '")')
   else
     if strlen(s:base64encoder)
@@ -73,7 +74,6 @@ endfunction
 
 function! OscillatorReadStrFromClipboard(clipboard_type)
   if has('nvim')
-    lua require('oscillator')
     let str_decoded = luaeval('oscillator_read_from_clipboard("' . a:clipboard_type . '")')
   else
     let response = ''
