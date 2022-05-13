@@ -1,4 +1,4 @@
-# Oscillator
+# oscillator
 
 Vim/Neovim plugin to access the system clipboard using OSC52 escape sequences.
 It provides both, yanking to and pasting from the clipboard. Neovim needs a
@@ -17,7 +17,7 @@ access for neovim.
     " let g:oscillator_base64encoder = 'base64'
     if has('nvim')
       let g:clipboard = {
-        \ 'name': 'Oscillator',
+        \ 'name': 'oscillator',
         \ 'copy': {
         \     '+': {lines, regtype -> OscillatorWriteRegToClipboard(lines, regtype, 'c')},
         \     '*': {lines, regtype -> OscillatorWriteRegToClipboard(lines, regtype, 'p')},
