@@ -127,8 +127,6 @@ endfunction
 
 " Paste clipboard to current position in buffer
 function! OscillatorPaste()
-  " TODO leave a choice which clipboard_type to read from when pasting
-  " directly into the buffer, without using registers?
   let str = OscillatorReadStrFromClipboard(g:oscillator_osc52_default_selection)
   exe "normal! a" . str . "\<Esc>"
 endfunction
@@ -143,8 +141,6 @@ function! OscillatorYankVisual() range
   endif
   let lines[-1] = lines[-1][: column_end - (&selection == 'inclusive' ? 1 : 2)]
   let lines[0] = lines[0][column_start - 1:]
-  " TODO leave a choice which clipboard_type to write to when yanking
-  " directly from the buffer to the clipboard, without using registers?
   call OscillatorWriteStrToClipboard(join(lines, "\n"), g:oscillator_osc52_default_selection)
   execute "normal! `<"
 endfunction
