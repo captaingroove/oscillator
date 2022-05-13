@@ -28,11 +28,12 @@ if has('nvim')
   lua require('oscillator')
 endif
 
+" Set options to default values
 let g:oscillator_silent = get(g:, 'oscillator_silent', v:true)
 let g:oscillator_yank_limit = get(g:, 'oscillator_yank_limit', 0)
 let g:oscillator_base64decoder = get(g:, 'oscillator_base64decoder', '')
 let g:oscillator_base64encoder = get(g:, 'oscillator_base64encoder', '')
-let g:oscillator_osc52_default_selection = get(g:, 'oscillator_osc52_default_selection', 'clipboard') ? 'c' : 'p'
+let g:oscillator_osc52_default_selection = get(g:, 'oscillator_osc52_default_selection', 'clipboard')
 
 function! s:warn(msg)
   echohl WarningMsg
@@ -41,20 +42,21 @@ function! s:warn(msg)
 endfunction
 
 function! OscillatorWriteStrToClipboard(str, clipboard_type)
+  let osc52_clipboard_type = a:clipboard_type == 'clipboard' ? 'c' : 'p'
   let length = strlen(a:str)
   if g:oscillator_yank_limit > 0 && length > g:oscillator_yank_limit
     call s:warn('[oscillator] selection has length ' . length . ', limit is ' . g:oscillator_yank_limit)
     return
   endif
   if has('nvim')
-    call luaeval("oscillator_write_to_clipboard(_A, '" . a:clipboard_type . "')", a:str)
+    call luaeval("oscillator_write_to_clipboard(_A, '" . osc52_clipboard_type . "')", a:str)
   else
     if strlen(g:oscillator_base64encoder)
       let str_encoded = system('echo ' . a:str . ' | ' . g:oscillator_base64encoder)
     else
       let str_encoded = s:b64encode(a:str, 0)
     endif
-    let request = "\e]52;" . a:clipboard_type . ";" . str_encoded . "\x07"
+    let request = "\e]52;" . osc52_clipboard_type . ";" . str_encoded . "\x07"
     call s:raw_echo(request)
   endif
   if !g:oscillator_silent
@@ -63,11 +65,12 @@ function! OscillatorWriteStrToClipboard(str, clipboard_type)
 endfunction
 
 function! OscillatorReadStrFromClipboard(clipboard_type)
+  let osc52_clipboard_type = a:clipboard_type == 'clipboard' ? 'c' : 'p'
   if has('nvim')
-    let str_decoded = luaeval("oscillator_read_from_clipboard('" . a:clipboard_type . "')")
+    let str_decoded = luaeval("oscillator_read_from_clipboard('" . osc52_clipboard_type . "')")
   else
     let response = ''
-    let request = "\e]52;" . a:clipboard_type . ";?\x07"
+    let request = "\e]52;" . osc52_clipboard_type . ";?\x07"
     call s:raw_echo(request)
     let semicolon_skip_count = 2
     while 1
@@ -100,7 +103,6 @@ function! OscillatorReadStrFromClipboard(clipboard_type)
 endfunction
 
 function! OscillatorWriteRegToClipboard(lines, regtype, clipboard_type)
-  let osc52_clipboard_type = a:clipboard_type == 'clipboard' ? 'c' : 'p'
   let str = ''
   " TODO handle all register types like 'c' characterwise text, 'l'
   " linewise text, 'b' blockwise text, like column "Type" in the register
@@ -110,12 +112,11 @@ function! OscillatorWriteRegToClipboard(lines, regtype, clipboard_type)
   elseif (a:regtype == 'c' || a:regtype == 'v')
     let str = a:lines[0]
   endif
-  call OscillatorWriteStrToClipboard(str, osc52_clipboard_type)
+  call OscillatorWriteStrToClipboard(str, a:clipboard_type)
 endfunction
 
 function! OscillatorReadRegFromClipboard(clipboard_type)
-  let osc52_clipboard_type = a:clipboard_type == 'clipboard' ? 'c' : 'p'
-  let str = OscillatorReadStrFromClipboard(osc52_clipboard_type)
+  let str = OscillatorReadStrFromClipboard(a:clipboard_type)
   let lines = split(str, "\n")
   if len(lines) == 1
     return [lines, 'c']
