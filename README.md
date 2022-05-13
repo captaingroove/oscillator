@@ -32,9 +32,7 @@ access for neovim.
       nnoremap <leader>p :OscillatorPaste<CR>
     endif
 
-## References
-
-Oscillator was inspired by:
+## Related projects
 
 - [OSCYank](https://github.com/ojroques/vim-oscyank)
 - [Vital](https://github.com/vim-jp/vital.vim)

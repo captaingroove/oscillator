@@ -41,14 +41,18 @@ function! OscillatorWriteStrToClipboard(str, clipboard_type)
     call s:warn('[oscillator] selection has length ' . length . ', limit is ' . s:yank_limit)
     return
   endif
-  if strlen(s:base64encoder)
-    let str_encoded = system('echo ' . a:str . ' | ' . s:base64encoder)
+  if has('nvim')
+    lua require('oscillator')
+    call luaeval('oscillator_write_to_clipboard("' . a:clipboard_type . '", "' . a:str . '")')
   else
-    " TODO use lua b64 encoder in nvim
-    let str_encoded= s:b64encode(a:str, 0)
+    if strlen(s:base64encoder)
+      let str_encoded = system('echo ' . a:str . ' | ' . s:base64encoder)
+    else
+      let str_encoded = s:b64encode(a:str, 0)
+    endif
+    let request = "\e]52;" . a:clipboard_type . ";" . str_encoded . "\x07"
+    call s:raw_echo(request)
   endif
-  let request = "\e]52;" . a:clipboard_type . ";" . str_encoded . "\x07"
-  call s:raw_echo(request)
   if !s:silent
     echom '[oscillator] ' . length . ' characters written to clipboard'
   endif
@@ -69,8 +73,8 @@ endfunction
 
 function! OscillatorReadStrFromClipboard(clipboard_type)
   if has('nvim')
-    :lua require('oscillator')
-    let str_decoded = luaeval('oscillator_pull_osc52("' . a:clipboard_type . '")')
+    lua require('oscillator')
+    let str_decoded = luaeval('oscillator_read_from_clipboard("' . a:clipboard_type . '")')
   else
     let response = ''
     let request = "\e]52;" . a:clipboard_type . ";?\x07"

@@ -20,13 +20,21 @@
 
 local base64 = require('base64')
 
-function oscillator_pull_osc52(cliptype)
+function oscillator_write_to_clipboard(clipboard_type, str)
+    local stderr = io.open("/dev/fd/2", "w")
+    str_encoded = base64.encode(str)
+    stderr:write('\027]52;' .. clipboard_type .. ';' .. str_encoded .. '\007')
+    stderr:flush()
+    stderr:close()
+end
+
+function oscillator_read_from_clipboard(clipboard_type)
     vim.api.nvim_ui_terminput_stop()
     ret = ''
     semicolon_skip_count = 2
     local stderr = io.open("/dev/fd/2", "w")
     local stdin = io.open("/dev/fd/0", "r")
-    stderr:write('\027]52;' .. cliptype .. ';?\007')
+    stderr:write('\027]52;' .. clipboard_type .. ';?\007')
     stderr:flush()
     while true do
         char = stdin:read(1)
