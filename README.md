@@ -10,7 +10,7 @@ vim / neovim session runs on a remote server or in a virtual environment. The
 clipboard text is transferred using stdin and stdout, so no additional
 communication channel needs to be set up.
 
-As off starting to write this plugin other solutions with a similar
+As of starting to write this plugin other solutions with a similar
 functionality provided only yanking to the clipboard, but not pasting from it.
 This plugin fills this gap and provides complete access to the system
 clipboard. In neovim, this works fully transparent using the '+' and '*'
