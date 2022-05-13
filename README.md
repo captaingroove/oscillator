@@ -19,12 +19,12 @@ access for neovim.
       let g:clipboard = {
         \ 'name': 'oscillator',
         \ 'copy': {
-        \     '+': {lines, regtype -> OscillatorWriteRegToClipboard(lines, regtype, 'c')},
-        \     '*': {lines, regtype -> OscillatorWriteRegToClipboard(lines, regtype, 'p')},
+        \     '+': {lines, regtype -> OscillatorWriteRegToClipboard(lines, regtype, 'clipboard')},
+        \     '*': {lines, regtype -> OscillatorWriteRegToClipboard(lines, regtype, 'primary')},
         \     },
         \ 'paste': {
-        \     '+': {-> OscillatorReadRegFromClipboard('c')},
-        \     '*': {-> OscillatorReadRegFromClipboard('p')},
+        \     '+': {-> OscillatorReadRegFromClipboard('clipboard')},
+        \     '*': {-> OscillatorReadRegFromClipboard('primary')},
         \     },
         \ }
     else

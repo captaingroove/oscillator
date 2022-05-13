@@ -100,6 +100,7 @@ function! OscillatorReadStrFromClipboard(clipboard_type)
 endfunction
 
 function! OscillatorWriteRegToClipboard(lines, regtype, clipboard_type)
+  let osc52_clipboard_type = a:clipboard_type == 'clipboard' ? 'c' : 'p'
   let str = ''
   " TODO handle all register types like 'c' characterwise text, 'l'
   " linewise text, 'b' blockwise text, like column "Type" in the register
@@ -109,11 +110,12 @@ function! OscillatorWriteRegToClipboard(lines, regtype, clipboard_type)
   elseif (a:regtype == 'c' || a:regtype == 'v')
     let str = a:lines[0]
   endif
-  call OscillatorWriteStrToClipboard(str, a:clipboard_type)
+  call OscillatorWriteStrToClipboard(str, osc52_clipboard_type)
 endfunction
 
 function! OscillatorReadRegFromClipboard(clipboard_type)
-  let str = OscillatorReadStrFromClipboard(a:clipboard_type)
+  let osc52_clipboard_type = a:clipboard_type == 'clipboard' ? 'c' : 'p'
+  let str = OscillatorReadStrFromClipboard(osc52_clipboard_type)
   let lines = split(str, "\n")
   if len(lines) == 1
     return [lines, 'c']
