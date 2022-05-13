@@ -16,11 +16,11 @@ This plugin fills this gap and provides complete access to the system
 clipboard. In neovim, this works fully transparent using the '+' and '*'
 registers. However, neovim needs a small patch to directly communicate from the
 plugin with the terminal emulator without any processing of stdin from the
-event loop. The patch is rather small and adds to functions to start and stop
-terminal input processing to the neovim API. It can be applied to e.g. neovim
-release version 0.7, but should work with other versions, too. The patch is
+event loop. The patch is rather small and adds two functions to the neovim API
+that start and stop terminal input processing. It can be applied to e.g. neovim
+release version 0.7 but should also work with other versions. The patch is
 supplied in this repository (nvim.patch). The neovim implementation is much
-faster the vim one, though.
+faster than the vim one, though.
 
 ## Installation
 
