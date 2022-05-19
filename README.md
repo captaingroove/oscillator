@@ -85,8 +85,8 @@ The plugin has been tested on Linux with the following vim versions:
 
 ... and with the following terminal emulators:
 
-- kitty 0.24.4. Add the following lines to with kitty.conf to allow OSC52
-  terminal sequences with no size limits for the clipboard text:
+- kitty 0.24.4. Add this to kitty.conf for allowing OSC52 terminal sequences
+  with unlimited clipboard text size:
 
     clipboard_control write-clipboard write-primary read-clipboard read-primary
     clipboard_max_size 0
