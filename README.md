@@ -1,60 +1,52 @@
-# oscillator
+# Oscillator
 
-Vim / neovim plugin to access the system clipboard using OSC52 terminal escape
-sequences.
+## Introduction
 
-Honoring OSC52 terminal sequences usually needs to be activated in your terminal
-emulator, if it supports them. Other than that, no further configuration or
-software is needed to have full access to your system clipboard, even if your
-vim / neovim session runs on a remote server or in a virtual environment. The
-clipboard text is transferred using stdin and stdout, so no additional
-communication channel needs to be set up.
-
-As of starting to write this plugin other solutions with a similar
-functionality provided only yanking to the clipboard, but not pasting from it.
-This plugin fills this gap and provides complete access to the system
-clipboard. In neovim, this works fully transparent using the '+' and '*'
-registers. However, neovim needs a small patch to directly communicate from the
-plugin with the terminal emulator without any processing of stdin from the
-event loop. The patch is rather small and adds two functions to the neovim API
-that start and stop terminal input processing. It can be applied to e.g. neovim
-release version 0.7 but should also work with other versions. The patch is
-supplied in this repository (nvim.patch). The neovim implementation is much
-faster than the vim one, though.
+Oscillator is a neovim / vim plugin to allow full access to the system
+clipboard in any environment. No additional requirements are needed, just set
+up your terminal emulator once to allow OSC52 terminal sequences and your done.
+This also works when running vim on a remote machine through ssh or in a
+virtual environment, e.g. docker. The clipboard contents is sent through stdin
+/ stdout, just the same way as the normal communication between vim and the
+terminal emulator. While there are other solutions for yanking contents from
+vim to the system clipboard (see related work), however they are lacking the
+other direction to paste the clipboard to vim.
 
 ## Installation
 
-Copy the plugin folder to an appropriate subdirectory in ~/.vim so that the
-build in vim plugin manager can find it.
+Copy the plugin folder (or git-clone it directly) to an appropriate place in
+your vim directory so that the built-in vim plugin manager can find it.
+For example:
 
-So far, the plugin has been tested only on Linux with vim 8.2, neovim
-v0.7.1-dev+33-g35075dcc2-dirty and kitty 0.24.4 as the terminal emulator.
+    $ mkdir -p ~/.vim/pack/plugins/start
+    $ cd ~/.vim/pack/plugins/start
+    $ git clone https://github.com/captaingroove/oscillator.git
 
 ## Configuration
 
-Sample vimrc entries to configure oscillator and enable transparent clipboard
-access for neovim.
+Neovim can be configured to handle clipboard access fully transparent using the + and *
+registers by putting this in you neovim config file:
 
-This is needed to activate the plugin functionality:
+    let g:clipboard = {
+      \ 'name': 'oscillator',
+      \ 'copy': {
+      \     '+': {lines, regtype -> OscillatorWriteRegToClipboard(lines, regtype, 'clipboard')},
+      \     '*': {lines, regtype -> OscillatorWriteRegToClipboard(lines, regtype, 'primary')},
+      \     },
+      \ 'paste': {
+      \     '+': {-> OscillatorReadRegFromClipboard('clipboard')},
+      \     '*': {-> OscillatorReadRegFromClipboard('primary')},
+      \     },
+      \ }
 
-    if has('nvim')
-      let g:clipboard = {
-        \ 'name': 'oscillator',
-        \ 'copy': {
-        \     '+': {lines, regtype -> OscillatorWriteRegToClipboard(lines, regtype, 'clipboard')},
-        \     '*': {lines, regtype -> OscillatorWriteRegToClipboard(lines, regtype, 'primary')},
-        \     },
-        \ 'paste': {
-        \     '+': {-> OscillatorReadRegFromClipboard('clipboard')},
-        \     '*': {-> OscillatorReadRegFromClipboard('primary')},
-        \     },
-        \ }
-    else
-      vnoremap <leader>y :OscillatorYank<CR>
-      nnoremap <leader>p :OscillatorPaste<CR>
-    endif
+For vim you can simply add two commands for yanking and pasting:
 
-Some optional settings:
+    vnoremap <leader>y :OscillatorYank<CR>
+    nnoremap <leader>p :OscillatorPaste<CR>
+
+That's it.
+
+There are some optional settings:
 
     g:oscillator_silent = v:true
     " v:false - surpress messages (default)
@@ -66,13 +58,13 @@ Some optional settings:
 
     g:oscillator_base64decoder = 'base64 -d'
     " Use this shell command to decode the clipboard text to base64. Default is a
-    " VimL implementation of the base64 algorithm. This applies only to vim.
+    " vimscript implementation of the base64 algorithm. This applies only to vim.
     " For neovim a lua implementation is used.
     " Default is '' which means use the plugin internal decoder.
 
     g:oscillator_base64encoder = 'base64'
     " Use this shell command to encode the clipboard text to base64. Default is a
-    " VimL implementation of the base64 algorithm. This applies only to vim.
+    " vimscript implementation of the base64 algorithm. This applies only to vim.
     " For neovim a lua implementation is used.
     " Default is '' which means use the plugin internal encoder.
 
@@ -84,8 +76,39 @@ Some optional settings:
     " Default is 'clipboard' which corresponds to the cut&paste clipboard on
     " most platforms.
 
+## Compatibility
 
-## Related projects
+The plugin has been tested on Linux with the following vim versions:
+
+- vim 8.2
+- neovim v0.7.1-dev+33-g35075dcc2-dirty with nvim.path from this repo applied
+
+... and with the following terminal emulators:
+
+- kitty 0.24.4 Add the following lines to with kitty.conf to allow OSC52
+  terminal sequences with no size limits for the clipboard text:
+
+    clipboard_control write-clipboard write-primary read-clipboard read-primary
+    clipboard_max_size 0
+
+## Caveats
+
+- The plugin works with vim out of the box, however a small patch is required for
+  neovim. The patch is supplied in this repo (vim.patch). You can apply it to
+  the neovim source code with the following command from the root of the source
+  tree:
+
+    $ git apply vim.patch
+
+  The upside is that the plugin is much faster with neovim than with vim due to
+  lua instead of vimscript. The plugin provides implemenation of the same
+  functionality in both, lua and vimscript.
+
+- When working remotely and also using a terminal multiplexer like tmux or any
+  other program that modifies stdin / stdout the OSC52 sequences might be
+  filtered out.
+
+## Related work
 
 - Yanking to the clipboard using OSC52 terminal sequences: [OSCYank](https://github.com/ojroques/vim-oscyank)
-- Base64 encoding / decoding in VimL: [Vital](https://github.com/vim-jp/vital.vim)
+- Base64 encoding / decoding in vimscript: [Vital](https://github.com/vim-jp/vital.vim)
