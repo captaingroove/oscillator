@@ -39,7 +39,7 @@ the + and * registers by putting this in you neovim config file:
       \     },
       \ }
 
-For vim you can simply add two commands for yanking and pasting:
+For vim you might simply add two key mappings for yanking and pasting:
 
     vnoremap <leader>y :OscillatorYank<CR>
     nnoremap <leader>p :OscillatorPaste<CR>
