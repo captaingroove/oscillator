@@ -9,7 +9,7 @@ This also works when running vim on a remote machine through ssh or in a
 virtual environment, e.g. docker. The clipboard contents is sent through stdin
 / stdout, just the same way as the normal communication between vim and the
 terminal emulator. While there are other solutions for yanking contents from
-vim to the system clipboard (see related work), however they are lacking the
+vim to the system clipboard (see related work) they are lacking the
 other direction to paste the clipboard to vim.
 
 ## Installation
@@ -24,8 +24,8 @@ For example:
 
 ## Configuration
 
-Neovim can be configured to handle clipboard access fully transparent using the + and *
-registers by putting this in you neovim config file:
+Neovim can be configured to handle clipboard access fully transparently using
+the + and * registers by putting this in you neovim config file:
 
     let g:clipboard = {
       \ 'name': 'oscillator',
@@ -48,27 +48,27 @@ That's it.
 
 There are some optional settings:
 
-    g:oscillator_silent = v:true
+    let g:oscillator_silent = v:true
     " v:false - surpress messages (default)
     " v:true  - be more verbose
 
-    g:oscillator_yank_limit = 1000000
+    let g:oscillator_yank_limit = 1000000
     " Limit the size of text in bytes that can be yanked to the clipboard.
     " Default is 0 which means no limit.
 
-    g:oscillator_base64decoder = 'base64 -d'
+    let g:oscillator_base64decoder = 'base64 -d'
     " Use this shell command to decode the clipboard text to base64. Default is a
     " vimscript implementation of the base64 algorithm. This applies only to vim.
     " For neovim a lua implementation is used.
     " Default is '' which means use the plugin internal decoder.
 
-    g:oscillator_base64encoder = 'base64'
+    let g:oscillator_base64encoder = 'base64'
     " Use this shell command to encode the clipboard text to base64. Default is a
     " vimscript implementation of the base64 algorithm. This applies only to vim.
     " For neovim a lua implementation is used.
     " Default is '' which means use the plugin internal encoder.
 
-    g:oscillator_osc52_default_selection = 'clipboard'
+    let g:oscillator_osc52_default_selection = 'clipboard'
     " Type of clipboard that is used by the OscillatorYank and OscillatorPaste
     " ex-commands. If set to a different value, the 'primary' selection is used.
     " 'clipboard' and 'primary' are clipboard types defined by the OSC52
@@ -85,7 +85,7 @@ The plugin has been tested on Linux with the following vim versions:
 
 ... and with the following terminal emulators:
 
-- kitty 0.24.4 Add the following lines to with kitty.conf to allow OSC52
+- kitty 0.24.4. Add the following lines to with kitty.conf to allow OSC52
   terminal sequences with no size limits for the clipboard text:
 
     clipboard_control write-clipboard write-primary read-clipboard read-primary
