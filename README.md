@@ -112,14 +112,14 @@ It has been tested with the following terminal emulators:
   apply it to the neovim source code with the following command from the root
   of the neovim git repo:
 
-```bash
-$ git apply vim.patch
-```
+    ```bash
+    $ git apply vim.patch
+    ```
 
-  The upside of this is that the plugin is much faster with neovim than with
-  vim by using lua instead of vimscript. The plugin provides implementations
-  for the same functionality in both, lua and vimscript. However, neovim
-  doesn't work with the vimscript version due to its async event loop.
+    The upside of this is that the plugin is much faster with neovim than with
+    vim by using lua instead of vimscript. The plugin provides implementations
+    for the same functionality in both, lua and vimscript. However, neovim
+    doesn't work with the vimscript version due to its async event loop.
 
 - When using a terminal multiplexer like tmux or any other program that scans
   and modifies stdin / stdout the OSC52 sequences might be filtered out and
